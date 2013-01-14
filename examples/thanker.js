@@ -1,0 +1,137 @@
+var twimap;
+twimap = require("twimap");
+var Twit = require("twit");
+var util = require("util");
+var _current_index = -1;
+var _followers_list ;
+var thanks_temp;
+
+thanks_temp = [
+    "Dear %s, thank you for following :)",
+    "%s = awesome. Me = grateful for following :)",
+    "Is there no limit to your awesomeness  %s? Thank you for following!",
+    "You can’t see me %s! but I’m totally doing a happy dance! Big thanks for following me on twitter :)",
+    "hey %s!Do you practice being so wonderful? Thank you kindly for following."
+];
+
+// create twitter client
+twit_cli = new Twit({
+	consumer_key:       "---consumer-key---"
+    , consumer_secret:     "---consumer-secret---"
+    , access_token:         "---access-token---"
+    , access_token_secret:  "---access-token-secret---"
+});
+
+//config TWIMAP imap account
+twimap.configImap({
+	user : '---username---@gmail.com',
+	password : '---password---',
+	host : 'imap.gmail.com',
+	port : 993,
+	secure : true
+});
+
+// stores last imap try
+var last_check =  now();
+
+
+//call this function periodically to get new followers
+//callback is called when new information is available
+function load_followers_priodically() {
+    try{
+
+	twimap.followersAsync(last_check, function(result) {
+		if(typeof result != "undefined" && result.length >=1){
+			//save it in our variable
+			_followers_list = result;
+            last_check = now();
+            msg_followers_thanks();
+		}
+
+
+	},function (err){
+
+        //  I command you to stay silent
+        reset_values();
+    });
+
+    }catch(e){
+    //still...
+        reset_values();
+        console.log(e);
+    }
+}
+
+
+
+//this function iterates through followers listed in variable
+//_followers_list 
+function msg_followers_thanks(){
+	
+	//move cursor
+	_current_index++;
+
+	//if there is no followers OR finished messaging followers stop
+	if(_current_index >= _followers_list.length  ){
+		_current_index = -1;
+		_followe_list = null;
+		return;
+	}
+		//otherwise get user name from twitter 
+		twit_cli.get("users/show",{screen_name:_followers_list[_current_index]}, function (err,dt){
+			
+			//clean up the name
+			var dude = filter_name(dt.name);
+           		
+			//message the user
+			 twit_cli.post("direct_messages/new" , {screen_name:_followers_list[_current_index],text:random_msg(dude)}, function (err,dt){
+					if(!err) console.log("done...");
+
+					//go for another round
+				 	msg_followers_thanks();
+			});
+           
+		});
+
+}
+
+//cut names bigger that 40 characters
+function filter_name(name){
+	if ( typeof name == "undefined" || name=="" || name==null) name = "my friend";
+	if(name.length > 40 ) name = name.substr(0,40);
+	return name;
+}
+
+
+//generate a random message
+function random_msg(name){
+	name = filter_name(name);
+	return  util.format(thanks_temp[Math.floor(Math.random()*10)%(thanks_temp.length-1)] , name);
+}
+
+//return current day
+function now() {
+    var d;
+    d = new Date();
+    return d.toUTCString();
+}
+
+//reset values on error
+function reset_values(){
+    _current_index = -1;
+    _followers_list = null;
+
+}
+
+// run safe and sound :|
+function run(){
+_interval = setInterval(load_followers_priodically,1000*60*30);
+
+//run now , I can't wait ;)
+load_followers_priodically();
+}
+
+//cheers to a happy running ;)
+run();
+
+

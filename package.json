@@ -1,0 +1,30 @@
+{
+  "name": "twimap",
+  "version": "0.0.0",
+  "description": "Twimap is a very simple Node.js module for collecting twitter followers user-name's from a specific date. ",
+  "main": "./lib/twimap",
+  "directories": {
+    "example": "examples"
+  },
+  "dependencies": {
+    "imap": "~0.7.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rasouli/twimap.git"
+  },
+  "keywords": [
+    "twitter",
+    "followers",
+    "recent",
+    "imap",
+    "new"
+  ],
+  "author": "Reza Rasouli Moqadam",
+  "license": "MIT",
+  "readmeFilename": "README.md"
+}
